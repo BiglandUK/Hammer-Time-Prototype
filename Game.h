@@ -2,6 +2,7 @@
 #include <iostream>
 #include <SFML\System\Time.hpp>
 #include "Window.h"
+#include "Block.h"
 
 class Game {
 public:
@@ -23,5 +24,7 @@ private:
 	sf::Clock clock_;
 	sf::Time elapsedTime_;
 	Window window_;
+
+	BlockMapManager blockManager_;
 
 };

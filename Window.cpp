@@ -39,6 +39,9 @@ void Window::EndDraw() { window_.display(); }
 void Window::Update() {
 	sf::Event event;
 	while (window_.pollEvent(event)) {
+		if (event.type == sf::Event::Closed) {
+			isDone_ = true;
+		}
 		if (event.type == sf::Event::LostFocus) {
 			isFocussed_ = false;
 		}

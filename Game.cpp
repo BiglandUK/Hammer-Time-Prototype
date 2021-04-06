@@ -27,7 +27,7 @@ void Game::Update() {
 void Game::Render() {
 	window_.BeginDraw();
 	// Render here
-
+	blockManager_.Draw(window_.GetRenderWindow());
 	window_.EndDraw();
 }
 
