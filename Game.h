@@ -3,6 +3,7 @@
 #include <SFML\System\Time.hpp>
 #include "Window.h"
 #include "Block.h"
+#include "Hammer.h"
 
 class Game {
 public:
@@ -26,5 +27,6 @@ private:
 	Window window_;
 
 	BlockMapManager blockManager_;
+	HammerManager hammerManager_;
 
 };

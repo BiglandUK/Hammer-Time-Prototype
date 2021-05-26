@@ -22,12 +22,15 @@ Window& Game::GetWindow() { return window_; }
 
 void Game::Update() {
 	window_.Update();
+	sf::Vector2i mousePos = sf::Mouse::getPosition(window_.GetRenderWindow());
+	blockManager_.Update(mousePos);
 }
 
 void Game::Render() {
 	window_.BeginDraw();
 	// Render here
 	blockManager_.Draw(window_.GetRenderWindow());
+	hammerManager_.Draw(window_.GetRenderWindow());
 	window_.EndDraw();
 }
 
