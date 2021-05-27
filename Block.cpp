@@ -8,10 +8,14 @@ Block::Block(unsigned int initialValue, unsigned int width, unsigned int length)
 unsigned int Block::GetValue() const { return value_; }
 unsigned int Block::GetLength() const { return length_; }
 unsigned int Block::GetWidth() const { return width_; }
+sf::Vector2i Block::GetPosition() const { return position_; }
 bool Block::CanBeHit() const { return canBeHit_; }
 
 void Block::SetLength(unsigned int length) { length_ = length; }
 void Block::SetWidth(unsigned int width) { width_ = width; }
+void Block::SetPosition(const sf::Vector2i& position){ SetPosition(position.x, position.y); }
+void Block::SetPosition(int x, int y){ position_.x = x; position_.y = y; }
+
 void Block::ToggleHitStatus() { canBeHit_ = !canBeHit_; }
 void Block::MakeHittable() { canBeHit_ = true; }
 void Block::MakeUnHittable() { canBeHit_ = false; }
@@ -22,7 +26,7 @@ BlockMapManager::BlockMapManager()
 {
 	font_.loadFromFile("arial.ttf");
 
-	// Create empty 5×5 map
+	// Create empty 5Ã—5 map
 	blockMap_.push_back(std::vector<BlockID>(5, 0));
 	blockMap_.push_back(std::vector<BlockID>(5, 0));
 	blockMap_.push_back(std::vector<BlockID>(5, 0));
