@@ -22,7 +22,7 @@ void Block::MakeUnHittable() { canBeHit_ = false; }
 
 // BlockMapManager
 BlockMapManager::BlockMapManager()
-:hoverBlockID_(0)
+:hoverBlockID_(0), selectedBlockID_(0)
 {
 	font_.loadFromFile("arial.ttf");
 
@@ -46,7 +46,9 @@ BlockMapManager::BlockMapManager()
 	blockList_.emplace(19, Block(16));
 	blockList_.emplace(20, Block(4));
 	blockList_.emplace(21, Block(9));
-	blockList_.emplace(22, Block(24));
+	Block b(100, 1, 2);
+	blockList_.emplace(22, b);
+	
 	blockList_.emplace(23, Block(9));
 	blockList_.emplace(24, Block(4));
 	blockList_.emplace(25, Block(32));
@@ -76,7 +78,7 @@ BlockMapManager::BlockMapManager()
 	blockMap_[2][0] = 20;
 	blockMap_[2][1] = 21;
 	blockMap_[2][2] = 22;
-	blockMap_[2][3] = 23;
+	blockMap_[2][3] = 1;
 	blockMap_[2][4] = 24;
 	blockMap_[3][0] = 25;
 	blockMap_[3][1] = 26;
@@ -90,12 +92,7 @@ BlockMapManager::BlockMapManager()
 	blockMap_[4][4] = 34;
 }
 
-void BlockMapManager::Draw(sf::RenderWindow& window) {
-	float bWidth = 50.0f; // standard block length
-	float bLength = 25.0f; // block length
-	float bHorizontalGap = 5.0f; // gap between blocks
-	float bVerticalGap = 5.0f;
-	
+void BlockMapManager::Draw(sf::RenderWindow& window) {	
 	sf::Text text; // text object for displaying the value
 	text.setFont(font_);
 	text.setFillColor(sf::Color::Black);
@@ -103,22 +100,22 @@ void BlockMapManager::Draw(sf::RenderWindow& window) {
 	text.setCharacterSize(22);
 
 	// shape object for the block
-	sf::RectangleShape block(sf::Vector2f(bWidth, bLength));
+	sf::RectangleShape block(sf::Vector2f(UNITBLOCKWIDTH, UNITBLOCKHEIGHT));
 	block.setFillColor(sf::Color(182, 192, 0));
-	float x = 100.0f;
-	float y = 100.0f;
+	float x = MAPSTARTX;
+	float y = MAPSTARTY;
 	block.setPosition(x, y);
 
 	//Hover surround
-	sf::RectangleShape highlight(sf::Vector2f(bWidth + 2 * bHorizontalGap, bLength + 2 * bVerticalGap));
+	sf::RectangleShape highlight(sf::Vector2f(UNITBLOCKHEIGHT + 2 * HORIZONTALGAP, UNITBLOCKWIDTH + 2 * VERTICALGAP));
 	highlight.setFillColor(sf::Color(230, 230, 100));
 	
 	for (int j = 0; j < 5; ++j) {
-		x = 100.0f;
-		y += (bLength + bHorizontalGap);
+		x = MAPSTARTX;
+		y += (UNITBLOCKWIDTH + HORIZONTALGAP);
 		for (int i = 0; i < 5; ++i)
 		{
-			x += (bWidth + bVerticalGap);
+			x += (UNITBLOCKHEIGHT + VERTICALGAP);
 			block.setPosition(x, y);
 			
 			// get the id from the map and look up the block in the block list.
@@ -130,26 +127,26 @@ void BlockMapManager::Draw(sf::RenderWindow& window) {
 			
 			//TODO: set up position better
 			//This sets the blocl position really inefficiently (every display frame! - great if blocks moved...)
-			itr->SetPosition(x,y);
+			itr->second.SetPosition(x,y);
 						
 			// Set size
 			unsigned int w = itr->second.GetWidth();
 			unsigned int l = itr->second.GetLength();
-			float blockWidth = bWidth * w + ((w-1)*bHorizontalGap);
-			float blockLength = bLength * l + ((l - 1) * bVerticalGap);
-			block.setSize(sf::Vector2f(blockWidth, blockLength));
+			float blockWidth = UNITBLOCKWIDTH * w + ((w-1)* HORIZONTALGAP);
+			float blockLength = UNITBLOCKHEIGHT * l + ((l - 1) * VERTICALGAP);
+			block.setSize(sf::Vector2f(blockLength, blockWidth));
 
 			std::string blockValue = std::to_string(itr->second.GetValue()); // get the block's value
 			text.setString(blockValue);
 			// centre the text on the block
 			sf::FloatRect textBounds = text.getGlobalBounds();
-			float widthOffset = (blockWidth - textBounds.width) / 2.0f;
-			float heightOffset = (blockLength - textBounds.height-10.0f)/2.0f; // the 10.0f here is fudge value.
+			float widthOffset = (blockLength - textBounds.width) / 2.0f;
+			float heightOffset = (blockWidth - textBounds.height-10.0f)/2.0f; // the 10.0f here is fudge value.
 			text.setPosition(x + widthOffset, y+heightOffset);
 
 			// Render highlight for hover
 			if (itr->first == hoverBlockID_) {
-				highlight.setPosition(x - bHorizontalGap, y - bVerticalGap);
+				highlight.setPosition(x - HORIZONTALGAP, y - VERTICALGAP);
 				window.draw(highlight);
 			}
 
@@ -174,20 +171,16 @@ bool BlockMapManager::Update(const sf::Vector2i& mousePos) {
 
 	
 BlockID BlockMapManager::IdentifyBlockUnderCursor(const sf::Vector2i & mousePos) {
-	float x = 100.0f;
-	float y = 100.0f;
-	float w = 50.0f;
-	float l = 25.0f;
-	float hGap = 5.0f;
-	float vGap = 5.0f;
+	float x = MAPSTARTX;
+	float y = MAPSTARTY;
 
 	for (int j = 0; j < 5; ++j) {
-		x = 100.0f;
-		y += (l + hGap); // blocks have a 5.0 pixel gap between them
+		x = MAPSTARTX;
+		y += (UNITBLOCKHEIGHT + HORIZONTALGAP); // blocks have a 5.0 pixel gap between them
 		for (int i = 0; i < 5; ++i)
 		{
-			x += (w + vGap); // blocks have a 5.0 pixel gap between them
-			sf::IntRect blockBounds(x, y, w, l);
+			x += (UNITBLOCKWIDTH + VERTICALGAP); // blocks have a 5.0 pixel gap between them
+			sf::IntRect blockBounds(x, y, UNITBLOCKWIDTH, UNITBLOCKHEIGHT);
 
 			if (blockBounds.contains(mousePos)) {
 				// get the id from the map and look up the block in the block list.

@@ -68,4 +68,11 @@ private:
 	
 	BlockID selectedBlockID_; // which block is currently targeted
 	BlockID hoverBlockID_; // which block the cursor is currently above.
+
+	const float UNITBLOCKWIDTH = 30.0f;
+	const float UNITBLOCKHEIGHT = 30.0f;
+	const float VERTICALGAP = 5.0f;
+	const float HORIZONTALGAP = 5.0f;
+	const float MAPSTARTX = 100.0f;
+	const float MAPSTARTY = 100.0f;
 };
