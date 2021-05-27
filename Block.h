@@ -15,7 +15,7 @@ private:
 	unsigned int value_; // the current value on the block
 	unsigned int width_, length_; // how much space the block takes
 	bool canBeHit_; //whether this block is exposed and available to be hit.
-
+	sf::Vector2i position_; // top left corner of block
 public:
 
 	Block(unsigned int initialValue, unsigned int width = 1, unsigned int length = 1);
@@ -23,10 +23,15 @@ public:
 	unsigned int GetValue() const;
 	unsigned int GetWidth() const;
 	unsigned int GetLength() const;
+	sf::Vector2i GetPosition() const;
 	bool CanBeHit() const;
 
 	void SetWidth(unsigned int width);
 	void SetLength(unsigned int length);
+	void SetPosition(const sf::Vector2i& position);
+	void SetPosition(int x, int y);
+	
+	
 	void ToggleHitStatus();
 	void MakeHittable();
 	void MakeUnHittable();
