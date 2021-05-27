@@ -127,7 +127,11 @@ void BlockMapManager::Draw(sf::RenderWindow& window) {
 			// If there isn't one (that part of the map is empty), don't draw anything.
 			if (itr == blockList_.end())
 				continue;
-
+			
+			//TODO: set up position better
+			//This sets the blocl position really inefficiently (every display frame! - great if blocks moved...)
+			itr->SetPosition(x,y);
+						
 			// Set size
 			unsigned int w = itr->second.GetWidth();
 			unsigned int l = itr->second.GetLength();
