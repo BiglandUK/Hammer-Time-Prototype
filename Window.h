@@ -21,10 +21,15 @@ public:
 
 	void ToggleFullscreen();
 	void Close();
+	void LostFocus();
+	void GainedFocus();
+	void Destroy();
 
 	sf::RenderWindow& GetRenderWindow();
 	sf::Vector2u GetWindowSize();
 	sf::FloatRect GetViewSpace();
+
+
 
 private:
 	void Setup(const std::string& title, const sf::Vector2u& size);
@@ -33,6 +38,7 @@ private:
 	sf::RenderWindow window_;
 	sf::Vector2u windowSize_;
 	std::string windowTitle_;
+
 
 	bool isDone_;
 	bool isFullscreen_;

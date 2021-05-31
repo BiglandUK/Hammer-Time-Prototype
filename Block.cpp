@@ -1,24 +1,41 @@
 #include "Block.h"
 
 // Block
-Block::Block(unsigned int initialValue, unsigned int width, unsigned int length)
-	: value_(initialValue), width_(width), length_(length), canBeHit_(false)
+Block::Block(unsigned int initialValue, unsigned int width, unsigned int height)
+	: value_(initialValue), width_(width), height_(height), canBeHit_(false)
 {}
 
 unsigned int Block::GetValue() const { return value_; }
-unsigned int Block::GetLength() const { return length_; }
+unsigned int Block::GetHeight() const { return height_; }
 unsigned int Block::GetWidth() const { return width_; }
 sf::Vector2i Block::GetPosition() const { return position_; }
 bool Block::CanBeHit() const { return canBeHit_; }
 
-void Block::SetLength(unsigned int length) { length_ = length; }
+void Block::SetValue(unsigned int value) { value_ = value; }
+void Block::SetHeight(unsigned int height) { height_ = height; }
 void Block::SetWidth(unsigned int width) { width_ = width; }
+void Block::SetSize(unsigned int width, unsigned int height) { SetWidth(width); SetHeight(height); }
 void Block::SetPosition(const sf::Vector2i& position){ SetPosition(position.x, position.y); }
 void Block::SetPosition(int x, int y){ position_.x = x; position_.y = y; }
 
 void Block::ToggleHitStatus() { canBeHit_ = !canBeHit_; }
 void Block::MakeHittable() { canBeHit_ = true; }
 void Block::MakeUnHittable() { canBeHit_ = false; }
+
+void Block::StrikeBlock(unsigned int hammerValue) {
+	value_ /= hammerValue;
+}
+
+//static method
+bool Block::IsPrime(unsigned int number) {
+	if (number == 2) // special case.
+		return true;
+	for (auto i = 2; i < sqrtl(number) + 1; ++i) {
+		if (number % i == 0)
+			return false;
+	}
+	return true;
+}
 
 // BlockMapManager
 BlockMapManager::BlockMapManager()
@@ -34,62 +51,72 @@ BlockMapManager::BlockMapManager()
 	blockMap_.push_back(std::vector<BlockID>(5, 0));
 
 	// create list of blocks
-	blockList_.emplace(10, Block(4));
-	blockList_.emplace(11, Block(8));
-	blockList_.emplace(12, Block(4));
-	blockList_.emplace(13, Block(8));
-	blockList_.emplace(14, Block(4));
-	blockList_.emplace(15, Block(32));
-	blockList_.emplace(16, Block(6));
-	blockList_.emplace(17, Block(9));
-	blockList_.emplace(18, Block(12));
-	blockList_.emplace(19, Block(16));
-	blockList_.emplace(20, Block(4));
-	blockList_.emplace(21, Block(9));
-	Block b(100, 1, 2);
-	blockList_.emplace(22, b);
-	
-	blockList_.emplace(23, Block(9));
-	blockList_.emplace(24, Block(4));
-	blockList_.emplace(25, Block(32));
-	blockList_.emplace(26, Block(12));
-	blockList_.emplace(27, Block(9));
-	blockList_.emplace(28, Block(6));
-	blockList_.emplace(29, Block(16));
-	blockList_.emplace(30, Block(4));
-	blockList_.emplace(31, Block(8));
-	blockList_.emplace(32, Block(4));
-	blockList_.emplace(33, Block(8));
-	blockList_.emplace(34, Block(4));
+	int x = 0;
+	int y = 0;
+	AddBlockToList(4, 10, x, y);
+	selectedBlockID_ = 10;
+	AddBlockToList(8, 11, x, y);
+	AddBlockToList(4, 12, x, y);
+	AddBlockToList(8, 13, x, y);
+	AddBlockToList(4, 14, x, y);
+	AddBlockToList(32,15, x, y);
+	AddBlockToList(6, 16, x, y); 
+	AddBlockToList(9, 17, x, y);
+	AddBlockToList(12,18, x, y); 
+	AddBlockToList(16,19, x, y); 
+	AddBlockToList(4, 20, x, y); 
+	AddBlockToList(9, 21, x, y);
+	AddBlockToList(100,22, x, y); 
+	AddBlockToList(9, 23, x, y); 
+	AddBlockToList(4, 24, x, y); 
+	AddBlockToList(15,25, x, y); 
+	AddBlockToList(12,26, x, y); 
+	AddBlockToList(9, 27, x, y); 
+	AddBlockToList(6, 28, x, y); 
+	AddBlockToList(16, 29, x, y); 
+	AddBlockToList(4, 30, x, y); 
+	AddBlockToList(8, 31, x, y); 
+	AddBlockToList(4, 32, x, y); 
+	AddBlockToList(8, 33, x, y); 
 	//IDs 0-9 reserved
 	// 0 = no block
-	// 1 = space taken up by a larger block
-	//Place blocks on map
-	blockMap_[0][0] = 10;
-	blockMap_[0][1] = 11;
-	blockMap_[0][2] = 12;
-	blockMap_[0][3] = 13;
-	blockMap_[0][4] = 14;
-	blockMap_[1][0] = 15;
-	blockMap_[1][1] = 16;
-	blockMap_[1][2] = 17;
-	blockMap_[1][3] = 18;
-	blockMap_[1][4] = 19;
-	blockMap_[2][0] = 20;
-	blockMap_[2][1] = 21;
-	blockMap_[2][2] = 22;
-	blockMap_[2][3] = 1;
-	blockMap_[2][4] = 24;
-	blockMap_[3][0] = 25;
-	blockMap_[3][1] = 26;
-	blockMap_[3][2] = 27;
-	blockMap_[3][3] = 28;
-	blockMap_[3][4] = 29;
-	blockMap_[4][0] = 30;
-	blockMap_[4][1] = 31;
-	blockMap_[4][2] = 32;
-	blockMap_[4][3] = 33;
-	blockMap_[4][4] = 34;
+
+}
+
+void BlockMapManager::AddBlockToList(unsigned int value, BlockID id, int& posX, int& posY) {
+	Block b{ value };
+	unsigned int width{ 1 };
+	unsigned int height{ 1 };
+	if (value > 99) { width = 2; }
+	b.SetSize(width, height);
+	b.SetPosition(posX, posY);
+	// add to blocklist
+	blockList_.emplace(id, b); 
+	// add to blockmap; TODO: check there's nothing there already
+	for (auto i = posX; i < posX + width; ++i) {
+		for (auto j = posY; j < posY + height; ++j) {
+			blockMap_[i][j] = id;
+		}
+	}
+
+	// determine next position TODO: cater for objects with height greater than 1
+	posX += width;
+	if (posX >= 5) {
+		posX = 0;
+		posY += 1;
+	}
+}
+
+sf::Vector2i BlockMapManager::FindSpaceInMap(unsigned int width, unsigned int height) {
+	for (int i = 0; i < 5-(width-1); ++i) {
+		for (int j = 0; j < 5-(height-1); ++j) {
+			if (blockMap_[i][j] > 0)
+				continue;
+			else
+				return sf::Vector2i(i, j);
+		}
+	}
+	return sf::Vector2i(5, 5); //failed to find space
 }
 
 void BlockMapManager::Draw(sf::RenderWindow& window) {	
@@ -104,90 +131,103 @@ void BlockMapManager::Draw(sf::RenderWindow& window) {
 	block.setFillColor(sf::Color(182, 192, 0));
 	float x = MAPSTARTX;
 	float y = MAPSTARTY;
-	block.setPosition(x, y);
 
-	//Hover surround
+	//Hover & Selected surround
 	sf::RectangleShape highlight(sf::Vector2f(UNITBLOCKHEIGHT + 2 * HORIZONTALGAP, UNITBLOCKWIDTH + 2 * VERTICALGAP));
-	highlight.setFillColor(sf::Color(230, 230, 100));
-	
-	for (int j = 0; j < 5; ++j) {
-		x = MAPSTARTX;
-		y += (UNITBLOCKWIDTH + HORIZONTALGAP);
-		for (int i = 0; i < 5; ++i)
-		{
-			x += (UNITBLOCKHEIGHT + VERTICALGAP);
-			block.setPosition(x, y);
-			
-			// get the id from the map and look up the block in the block list.
-			auto itr = blockList_.find(blockMap_[j][i]);
-			
-			// If there isn't one (that part of the map is empty), don't draw anything.
-			if (itr == blockList_.end())
-				continue;
-			
-			//TODO: set up position better
-			//This sets the blocl position really inefficiently (every display frame! - great if blocks moved...)
-			itr->second.SetPosition(x,y);
-						
-			// Set size
-			unsigned int w = itr->second.GetWidth();
-			unsigned int l = itr->second.GetLength();
-			float blockWidth = UNITBLOCKWIDTH * w + ((w-1)* HORIZONTALGAP);
-			float blockLength = UNITBLOCKHEIGHT * l + ((l - 1) * VERTICALGAP);
-			block.setSize(sf::Vector2f(blockLength, blockWidth));
 
-			std::string blockValue = std::to_string(itr->second.GetValue()); // get the block's value
-			text.setString(blockValue);
-			// centre the text on the block
-			sf::FloatRect textBounds = text.getGlobalBounds();
-			float widthOffset = (blockLength - textBounds.width) / 2.0f;
-			float heightOffset = (blockWidth - textBounds.height-10.0f)/2.0f; // the 10.0f here is fudge value.
-			text.setPosition(x + widthOffset, y+heightOffset);
+	for (const auto &b : blockList_) {
+		sf::Vector2i pos = b.second.GetPosition();
+		x = MAPSTARTX + pos.x * (UNITBLOCKWIDTH + HORIZONTALGAP);
+		y = MAPSTARTY + pos.y * (UNITBLOCKHEIGHT + VERTICALGAP);
+		block.setPosition(x, y);
+		int width = b.second.GetWidth() * (UNITBLOCKWIDTH) + (b.second.GetWidth()-1) * HORIZONTALGAP;
+		int height = b.second.GetHeight() * (UNITBLOCKHEIGHT)+(b.second.GetHeight() - 1) * VERTICALGAP;;
+		block.setSize(sf::Vector2f(width, height));
 
-			// Render highlight for hover
-			if (itr->first == hoverBlockID_) {
-				highlight.setPosition(x - HORIZONTALGAP, y - VERTICALGAP);
-				window.draw(highlight);
-			}
+		std::string blockValue = std::to_string(b.second.GetValue()); // get the block's value
+		text.setString(blockValue);
+		// centre the text on the block
+		sf::FloatRect textBounds = text.getGlobalBounds();
+		float widthOffset = (width - textBounds.width) / 2.0f;
+		float heightOffset = (height - textBounds.height-10.0f)/2.0f; // the 10.0f here is fudge value.
+		text.setPosition(x + widthOffset, y+heightOffset);
 
-			// Render block and value
-			window.draw(block);
-			window.draw(text);
-
+		// Render highlight for hover
+		if (b.first == hoverBlockID_) {
+			highlight.setFillColor(sf::Color(230, 230, 100));
+			highlight.setSize(sf::Vector2f(width + 2*HORIZONTALGAP, height + 2*VERTICALGAP));
+			highlight.setPosition(x - HORIZONTALGAP, y - VERTICALGAP);
+			window.draw(highlight);
 		}
-	}	
+		if (b.first == selectedBlockID_) {
+			highlight.setFillColor(sf::Color(200, 0, 0, 200));
+			highlight.setSize(sf::Vector2f(width + 2 * HORIZONTALGAP, height + 2 * VERTICALGAP));
+			highlight.setPosition(x - (HORIZONTALGAP), y - (VERTICALGAP));
+			window.draw(highlight);
+		}
+		// Render block and value
+		window.draw(block);
+		window.draw(text);
+	}
 }
 
 bool BlockMapManager::Update(const sf::Vector2i& mousePos) {
 	// Find which block is under the mouse cursor
 	BlockID hover = IdentifyBlockUnderCursor(mousePos);
+	if (hover == 0) {
+		hoverBlockID_ = hover;
+		return false;
+	}
 	hoverBlockID_ = hover;
-	// Is it the same as before?
-	// Is it the same as the selected block?
-	// Is there one at all?
-
-	return false;
+	return true;
 }
 
+void BlockMapManager::SelectBlock(const sf::Vector2i& mousePos) {
+	BlockID select = IdentifyBlockUnderCursor(mousePos);
+	if(select>0)
+		selectedBlockID_ = select;
+}
 	
 BlockID BlockMapManager::IdentifyBlockUnderCursor(const sf::Vector2i & mousePos) {
-	float x = MAPSTARTX;
-	float y = MAPSTARTY;
+	int x = MAPSTARTX;
+	int y = MAPSTARTY;
 
-	for (int j = 0; j < 5; ++j) {
-		x = MAPSTARTX;
-		y += (UNITBLOCKHEIGHT + HORIZONTALGAP); // blocks have a 5.0 pixel gap between them
-		for (int i = 0; i < 5; ++i)
-		{
-			x += (UNITBLOCKWIDTH + VERTICALGAP); // blocks have a 5.0 pixel gap between them
-			sf::IntRect blockBounds(x, y, UNITBLOCKWIDTH, UNITBLOCKHEIGHT);
-
-			if (blockBounds.contains(mousePos)) {
-				// get the id from the map and look up the block in the block list.
-				auto itr = blockList_.find(blockMap_[j][i]);
-				return itr->first;
-			}
+	for (const auto& b : blockList_) {
+		sf::Vector2i pos = b.second.GetPosition();
+		x = MAPSTARTX + pos.x * (UNITBLOCKWIDTH + HORIZONTALGAP);
+		y = MAPSTARTY + pos.y * (UNITBLOCKHEIGHT + VERTICALGAP);
+		int width = b.second.GetWidth() * (UNITBLOCKWIDTH)+(b.second.GetWidth() - 1) * HORIZONTALGAP;
+		int height = b.second.GetHeight() * (UNITBLOCKHEIGHT)+(b.second.GetHeight() - 1) * VERTICALGAP;;
+		sf::IntRect blockBounds(x, y, width, height);
+		if (blockBounds.contains(mousePos)) {
+			return b.first;
 		}
 	}
+
 	return 0;
+}
+
+unsigned int BlockMapManager::HitBlock(unsigned int hammerValue) {
+	auto& b = blockList_.at(selectedBlockID_);
+	unsigned int bv = b.GetValue();
+	if (bv % hammerValue != 0) // hammer does not divide into block exactly.
+		return 0;
+
+	// divide block value by hammer
+	b.StrikeBlock(hammerValue);
+	unsigned int newBlockValue = b.GetValue();
+	if (Block::IsPrime(b.GetValue())) {
+		// block has left a prime.
+		b.SetValue(0);
+		blockList_.erase(selectedBlockID_);
+		return newBlockValue;
+	}
+	else if (b.GetValue() == 1) { // block reduced to 1.
+		//increase coins/score by 1
+		b.SetValue(0);
+		blockList_.erase(selectedBlockID_);
+		return newBlockValue;
+	}
+	return newBlockValue;
+
 }

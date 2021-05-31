@@ -21,6 +21,7 @@ public:
 private:
 	void RestartClock();
 	
+	void HitBlock();
 
 	sf::Clock clock_;
 	sf::Time elapsedTime_;

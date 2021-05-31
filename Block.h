@@ -13,21 +13,25 @@ class Block {
 
 private:
 	unsigned int value_; // the current value on the block
-	unsigned int width_, length_; // how much space the block takes
+	unsigned int width_, height_; // how much space the block takes
 	bool canBeHit_; //whether this block is exposed and available to be hit.
 	sf::Vector2i position_; // top left corner of block
 public:
 
-	Block(unsigned int initialValue, unsigned int width = 1, unsigned int length = 1);
+	Block(unsigned int initialValue, unsigned int width = 1, unsigned int height = 1);
 
 	unsigned int GetValue() const;
 	unsigned int GetWidth() const;
-	unsigned int GetLength() const;
+	unsigned int GetHeight() const;
 	sf::Vector2i GetPosition() const;
 	bool CanBeHit() const;
 
+	void SetValue(unsigned int value);
+
 	void SetWidth(unsigned int width);
-	void SetLength(unsigned int length);
+	void SetHeight(unsigned int height);
+	void SetSize(unsigned int width, unsigned int height);
+
 	void SetPosition(const sf::Vector2i& position);
 	void SetPosition(int x, int y);
 	
@@ -39,6 +43,8 @@ public:
 	void StrikeBlock(unsigned int hammerValue); // block is hit by a hammer
 	void DestroyBlock(); // block is destroyed
 
+	// check if a number is prime.
+	static bool IsPrime(unsigned int number);
 };
 
 
@@ -55,11 +61,27 @@ public:
 	void UpdateBlocksHittableStatus();
 	void CheckBlock(Block& block); // checks a single block
 	/*Logic - when a block is destroyed, in most cases it will expose one or more blocks
-	* Any blocks on the map edge are exposed.
+	* Any blocks on the map edge are already exposed.
 	*/
+
+	// Player is selecting a block.
+	void SelectBlock(const sf::Vector2i& mousePos);
+
+	// Player is hitting a block - returns new value of block, or 0 if hit fail
+	unsigned int HitBlock(unsigned int hammerValue);
+
+
 
 private:
 	BlockID IdentifyBlockUnderCursor(const sf::Vector2i& mousePos);
+
+	// Determines block size and position and adds to BlockList.
+	void AddBlockToList(unsigned int value, BlockID id, int& posX, int& posY);
+
+	//Searches for the first available space in the map for the desired block size
+	// returns max map size if none found.
+	sf::Vector2i FindSpaceInMap(unsigned int width, unsigned int height);
+
 
 private:
 	sf::Font font_;

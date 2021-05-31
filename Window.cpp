@@ -17,9 +17,6 @@ void Window::Setup(const std::string& title, const sf::Vector2u& size) {
 	isDone_ = false;
 	isFocussed_ = true;
 
-	/*m_eventManager.AddCallback(StateType(0), "Fullscreen_toggle", &Window::ToggleFullscreen, this);
-	m_eventManager.AddCallback(StateType(0), "Window_close", &Window::Close, this);*/
-
 	Create();
 }
 
@@ -48,6 +45,12 @@ void Window::Update() {
 		else if (event.type == sf::Event::GainedFocus) {
 			isFocussed_ = true;
 		}
+		// mouse button released
+        if(event.type == sf::Event::MouseButtonReleased){
+			if (event.mouseButton.button == sf::Mouse::Left)
+				int f = 0;
+		}
+
 	}
 }
 
@@ -57,14 +60,24 @@ bool Window::IsFullscreen(){ return isFullscreen_; }
 
 bool Window::IsFocussed() { return isFocussed_; }
 
+void Window::Destroy() { window_.close(); }
+
 void Window::ToggleFullscreen() {
 	isFullscreen_ = !isFullscreen_;
-	window_.close();
+	Destroy();
 	Create();
 }
 
 void Window::Close() {
 	isDone_ = true;
+}
+
+void Window::LostFocus() {
+	isFocussed_ = false;
+}
+
+void Window::GainedFocus() {
+	isFocussed_ = true;
 }
 
 sf::RenderWindow& Window::GetRenderWindow() {
